@@ -1,5 +1,6 @@
 import random
 import requests
+# from Live2 import difficulty
 
 
 def get_money_interval():
@@ -26,9 +27,10 @@ def get_guess_from_user():
         print("wrong")
 
 
-def play_cr():
-    get_money_interval()
-    get_guess_from_user()
+def play_cr(chosen_difficulty):
+    get_money_interval(chosen_difficulty)
+    get_guess_from_user(chosen_difficulty)
 
 
-play_cr()
+if __name__ == "__main__":
+    play_cr(chosen_difficulty)

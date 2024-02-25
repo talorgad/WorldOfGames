@@ -1,43 +1,53 @@
 import random
+import Live
+from DataManager import read_data
+
 
 def generate_number():
-    global diff_num, secret_number
-    while True:
-        try:
-            diff_num = int(input("please enter the difficulty level number: "))
-            secret_number = int(random.uniform(1, diff_num))
-        except ValueError:
-            print("You must select a number, please try again ")
-            continue
-        if diff_num < 1:
-            print("please select a number greater than 1 ")
-            continue
-        break
-    return diff_num, secret_number
+    global secret_number
+    data = read_data("data.csv")
+    difficulty = data.iloc[-1]["difficulty_level"]
+    secret_number = int(random.uniform(0, int(difficulty)))
+    print(secret_number)
+    return secret_number
 
-difficulty = generate_number()
 
 def get_guss_from_user():
     while True:
-        user_guss = int(input(f"please make a guess between 1 to {difficulty[0]}: "))
-        if not 1 <= user_guss <= difficulty[0]:
-            print(f"number is not in the range, please select a number between 1 - {difficulty[0]} ")
+        data = read_data("data.csv")
+        difficulty = data.iloc[-1]["difficulty_level"]
+        user_guss = int(input(f"please make a guess between 0 to {difficulty}: "))
+        if not 0 <= user_guss <= int(difficulty):
+            print(f"number is not in the range, please select a number between 0 - {difficulty} ")
         else:
             return user_guss
 
-guss_num = get_guss_from_user()
 
-def compare_results():
-    if difficulty[1] == guss_num:
+def compare_results(secret_number,user_guss):
+    data = read_data("data.csv")
+    difficulty = data.iloc[-1]["difficulty_level"]
+    if secret_number == user_guss:
         return "TRUE"
     else:
         return "FALSE"
 
-result = compare_results()
-print(result)
+
+def play_gg():
+    data = read_data("data.csv")
+    difficulty = data.iloc[-1]["difficulty_level"]
+    secret_number_difficulty = generate_number()
+    user_guss = get_guss_from_user()
+    result = compare_results(secret_number_difficulty, user_guss)
+    print(result)
+    exit()
 
 
-def play():
-    generate_number()
-    get_guss_from_user()
-    compare_results()
+if __name__ == "__main__":
+    play_gg()  # Pass the chosen difficulty to the play_gg function
+
+# Call play_gg with the chosen difficulty
+# user_difficulty = difficulty
+# result = play_gg(user_difficulty)
+
+# The program will exit after printing the result
+

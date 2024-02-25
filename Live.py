@@ -1,33 +1,87 @@
-def welcome(name):
-    # name = input(print("please enter your name: "))
-    print(f"Hello {name} and welcome to the World of Games (WoG)" + "\n" + "here you can find many cool games to play." + "\n")
+import pandas as pd
+import MemoryGame
+from DataManager import read_data, write_data
+import importlib
 
-# welcome()
+def welcome():
+    name = input("Hello! What is your name? ")
+    print(f"Welcome to the games, {name}!")
+    return name
 
+def choose_game():
+    print("Please choose a game to play:")
+    print("1. Memory Game - a sequence of numbers will appear for 1 second and you have to guess it back")
+    print("2. Guess Game - guess a number and see if you chose like the computer")
+    print("3. Currency Roulette - try and guess the value of a random amount of USD in ILS")
 
-def load_game():
-
-    # game_map = {
-    #     1: play_mg,
-    #     2: play_gg,
-    #     3: play_cr
-    # }
     while True:
         try:
-            chosen_game = int(input("""Please choose a game to play:
-                1. Memory Game - a sequence of numbers will appear for 1 second and you have to guess it back
-                2. Guess Game - guess a number and see if you chose like the computer
-                3. Currency Roulette - try and guess the value of a random amount of USD in ILS
-                """))
+            chosen_game = int(input("Enter your choice: "))
+            if 1 <= chosen_game <= 3:
+                return int(chosen_game)
+            else:
+                print("Invalid choice. Please try again.")
         except ValueError:
-            print("You must select the game number, please try again ")
-            continue
-        if not 1 <= chosen_game <= 3:
-            print("please select between 1 to 3 ")
-            continue
-        break
+            print("Invalid input. Please enter a number.")
 
-    game_map[chosen_game]()
+def choose_difficulty():
+    print("Please choose game difficulty from 1 to 5:")
 
+    while True:
+        try:
+            difficulty_level = int(input("Enter your choice: "))
+            if 1 <= difficulty_level <= 5:
+                return int(difficulty_level)
+            else:
+                print("Invalid choice. Please try a number between 1 and 5.")
+        except ValueError:
+            print("Invalid input. Please enter a whole number.")
 
-load_game()
+def update_data(name, game_name, game_number, difficulty_level, score):
+    data = {
+        "name": [name],
+        "game_name": [game_name],
+        "game_number": [game_number],
+        "difficulty_level": [difficulty_level],
+        "score": [score]
+    }
+    # Read existing data (create empty DataFrame if file doesn't exist)
+    existing_data = read_data("data.csv")
+    # Append new data to existing DataFrame
+    new_data = pd.DataFrame(data)
+    combined_data = pd.concat([existing_data, new_data], ignore_index=True)
+    # Write updated data to CSV
+    write_data("data.csv", combined_data)
+
+def run_game(chosen_game, chosen_difficulty):
+    game_modules = {
+        1: "MemoryGame",
+        2: "GuessGame",
+        3: "CurrencyRoulette"
+    }
+    game_module = game_modules[chosen_game]
+
+    try:
+        game_file = importlib.import_module(game_module)
+        if hasattr(game_file, "play_mg" if chosen_game == 1 else "play_gg" if chosen_game == 2 else "play_cr"):
+            # Game file has the appropriate play function
+            game_file.play_mg() if chosen_game == 1 else game_file.play_gg() if chosen_game == 2 else game_file.play_cr()
+        else:
+            print(f"Game module '{game_module}' does not have a 'play_{game_file.lower()}' function!")
+    except ImportError:
+        print(f"Error importing game module '{game_module}'!")
+
+def main():
+    name = welcome()
+    chosen_game = choose_game()
+    game_name = {1: "MemoryGame", 2: "GuessGame", 3: "CurrencyRoulette"}[chosen_game]
+    game_number = chosen_game
+    difficulty_level = choose_difficulty()
+    score = MemoryGame.save_score()
+
+    update_data(name, game_name, game_number, difficulty_level, score)
+
+    run_game(chosen_game, difficulty_level)
+
+if __name__ == "__main__":
+    main()
